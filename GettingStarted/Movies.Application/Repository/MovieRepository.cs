@@ -63,7 +63,7 @@ namespace Movies.Application.Repository
             var movie = await connection.QuerySingleOrDefaultAsync<Movie>(new CommandDefinition(
                 """
                 select * from movies where id = @id
-                """, new { Id = id }));
+                """, new { id }));
 
             if (movie == null)
                 return null;
@@ -71,7 +71,7 @@ namespace Movies.Application.Repository
             var genres = await connection.QueryAsync<string>(new CommandDefinition(
                 """
                 select name from genres_new where movieId = @id
-                """, new { Id = id }));
+                """, new { id }));
 
             foreach (var item in genres)
             {
@@ -86,27 +86,27 @@ namespace Movies.Application.Repository
         {
             // open connection
             using var connection = await _connectionFactory.CreateConnectionAsync();
-            var slugResponse = await connection.QueryFirstOrDefaultAsync<Movie>(new CommandDefinition(
+            var movie = await connection.QueryFirstOrDefaultAsync<Movie>(new CommandDefinition(
                 """
                 select * from movies where slug = @slug
-                """, new { Slug = slug }
+                """, new { slug }
                ));
 
-            if (slugResponse == null) return null;
+            if (movie == null) return null;
 
             var genres = await connection.QueryAsync<string>(new CommandDefinition(
                 """
-                select name from genres_new where movieId = (select id from movies where slug = @slug)
-                """, new { Slug = slug }
+                select name from genres_new where movieId = @id
+                """, new { id = movie.Id }
                 ));
 
 
             foreach (var item in genres)
             {
-                slugResponse.Genres.Add(item);
+                movie.Genres.Add(item);
             }
 
-            return slugResponse;
+            return movie;
         }
 
         public Task<bool> UpdateAsync(Movie movie)

@@ -49,14 +49,14 @@ namespace Movies.Application.Repository
 
             await connection.ExecuteAsync(new CommandDefinition(
                 """
-                delete from genres_new where moviesId = @id
-                """, new { id }
+                delete from genres_new where movieId = @id
+                """, new { id }, transaction
                 ));
 
             var result = await connection.ExecuteAsync(new CommandDefinition(
                 """
                 delete from movies where id = @id
-                """, new { id }
+                """, new { id }, transaction
                 ));
 
             transaction.Commit();
@@ -70,7 +70,8 @@ namespace Movies.Application.Repository
             return await connection.ExecuteScalarAsync<bool>(new CommandDefinition(
                 """
                 select count(1) from movies where id = @id
-                """, new { id }));
+                """, new { id }
+            ));
         }
 
         public async Task<IEnumerable<Movie>> GetAllAsync()

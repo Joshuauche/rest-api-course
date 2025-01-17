@@ -160,7 +160,7 @@ namespace Movies.Application.Repository
             await connection.ExecuteAsync(new CommandDefinition(
                 """
                 delete from genres_new where movieId = @id
-                """, new { id = movie.Id }
+                """, new { id = movie.Id }, transaction
                 ));
 
             foreach (var genre in movie.Genres)
@@ -169,7 +169,7 @@ namespace Movies.Application.Repository
                     """
                     insert into genres_new (movieId, name)
                     values(@MovieId, @Name)
-                    """, new { movieId = movie.Id, Name = genre }
+                    """, new { movieId = movie.Id, Name = genre }, transaction
                     ));
             }
 
@@ -177,7 +177,7 @@ namespace Movies.Application.Repository
                 """
                 update movies set slug = @Slug, title = @title, yearofrelease = @yearOfRelease
                 where id = @Id
-                """, movie
+                """, movie, transaction
                 ));
             transaction.Commit();
             return result > 0;
